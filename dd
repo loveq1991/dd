@@ -1,0 +1,37 @@
+1. debian-10.tar.bz2, 此文件为Debian 10.3压缩后的DD底包, 解压后是一个350MB的raw格式硬盘镜像, 你需要上传到你另一台有HTTP服务的小鸡上, 然后通过网络直接写入到小鸡的硬盘即可, root密码为administrator, 以virmach为例的关键步骤如下:
+a. 关机, 设置CD-ROM为第一引导项, 加载AlpineLinux镜像并启动, 然后通过VNC链接到Alpine的控制台.
+b. 使你的Alpine连上网: ifconfig eth0 up && udhcpc eth0
+c. 通过网络写入硬盘镜像: wget -O – http://a.b.c.d/debian-10.raw | dd of=/dev/vda
+d. 使用poweroff命令关机, 设置硬盘为第一引导项目并卸载CD-ROM中的AlpineLinux镜像.
+e. 启动系统, 连接VNC, 不出意外的话应该能进入Debian 10.3系统了, 但根分区可用空间只有10MB左右, 需要立即进行分区扩容, 千万不要更新系统, 否则你的分区会被软件源索引数据填满, 悲剧了,,,
+f. 分区表扩容, 以parted为例, fdisk同理:
+# parted /dev/vda
+(parted) unit s
+(parted) p free # 记录下硬盘结束的selector位置
+(parted) resizepart 1
+(parted) # 输入硬盘结束位置, 例如12345555s
+(parted) quit
+# reboot
+g. 文件系统扩容: resize2fs /dev/vda1
+h. 建议再次reboot
+
+2. linux-*.deb, 这三个文件为内核相关安装包, 如果你不需要在小鸡上编译软件可以只安装linux-image-*.deb这一个文件就可以了.
+
+3. config.txt, 此文件为裁剪后的内核编译配置文件, 如果你想自行编译内核把此文件重命名为.config然后放到内核源码根目录然后直接make menuconfig进行调整然后编译就可以了, 内核编译步骤自行搜索, 我自己在2012款老古董RMBP上的VBox中使用4线程编译9分钟可以编译完.
+
+4. 内核说明:
+a. Kernel 4.13+的TCP协议栈内部已经实现了pacing, BBR不需要再强制搭配fq算法的qdisc了.
+b. 裁剪后的内核默认qdisc为fq_codel(自行搜索, ArchLinux已默认使用此算法), tcp_congestion_control为bbr, 也就是说默认已经是BBR不用在自行开启了.
+
+5. DD底包说明:
+a. 默认开启了zram, 自动初始化了一个内存一半大小的zram设备作为交换分区, 内存交换页压缩比如果为1:2的话相当于系统多出了1/3的物理内存, 如果不需要可以使用systemctl disable zram禁用此服务.
+b. 默认使用了iptables + ipset的防火墙策略, 如果不需要可以使用systemctl disable netfilter-persistent和systemctl disable ipset-persistent禁用.
+c. 系统通过内核参数禁用了ipv6, 如果想开启去除/etc/default/grub文件中的ipv6.disable=1然后重新生成grub引导文件然后重启即可.
+d. 去除了从DHCP服务器获取DNS信息自动更新/etc/resolv.conf文件的功能.
+e. 系统默认使用了CGroups v2, 如果想切换回v1去除/etc/default/grub文件中的cgroup_no_v1=all systemd.unified_cgroup_hierarchy=1然后重新生成grub引导文件然后重启即可.
+f. 系统默认加载了nf_conntrack模块并在/etc/sysctl.conf文件中配置了全局TCP连接数限制, 可根据自己硬件情况对相关参数进行调整.
+g. /etc/sysctl.conf文件中还添加了几个常用内核参数配置, 在文件最下面, 例如tcp_fastopen, ip_local_port_range等, 可根据自己的情况进行调整.
+h. Debian 10.3的systemd强制/run分区必须要有16MB的空闲空间才能执行systemd相关命令(a safety buffer of 16.0M is enforced), 如果你的系统启动后自行计算的/run分区小于20MB可以去除/etc/fstab文件中的/run挂载点前的注释然后重启系统.
+i. 制作底包时使用了163的软件源镜像忘记改了, 如果你的小鸡在国外推荐修改为国外的软件源, 例如FB镜像.
+j. 系统默认使用journald->rsyslog的方式记录日志, 如果不满足你的需求可以卸载rsyslog并调整journald的配置.
+k. 系统默认使用haveged进行随机数熵值生成, 如果你想使用硬件熵值收集器可以禁用haveged并开启rngd服务, 修改前建议你执行测试两者的随机数生成速度.
