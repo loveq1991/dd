@@ -1,0 +1,10 @@
+一、进入救援模式并进行dd系统
+a. 关机, 设置CD-ROM为第一引导项, 加载AlpineLinux镜像并启动, 然后通过VNC链接到Alpine的控制台。
+b. 使你的Alpine连上网。
+
+ifconfig eth0 up && udhcpc eth0
+c. 通过网络写入硬盘镜像，请注意修改硬盘地址。
+
+wget -O – https://file.207614.xyz/chfs/shared/iso/dd/debian/debian-10.raw | dd of=/dev/vda
+d. 使用poweroff命令关机, 设置硬盘为第一引导项目并卸载CD-ROM中的AlpineLinux镜像。
+e. 启动系统, 连接VNC, 不出意外的话应该能进入Debian 10.3系统了, 但根分区可用空间只有10MB左右, 需要立即进行分区扩容, 千万不要更新系统, 否则你的分区会被软件源索引数据填满, 悲剧了。
