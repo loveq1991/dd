@@ -8,3 +8,14 @@ c. 通过网络写入硬盘镜像，请注意修改硬盘地址。
 wget -O – https://file.207614.xyz/chfs/shared/iso/dd/debian/debian-10.raw | dd of=/dev/vda
 d. 使用poweroff命令关机, 设置硬盘为第一引导项目并卸载CD-ROM中的AlpineLinux镜像。
 e. 启动系统, 连接VNC, 不出意外的话应该能进入Debian 10.3系统了, 但根分区可用空间只有10MB左右, 需要立即进行分区扩容, 千万不要更新系统, 否则你的分区会被软件源索引数据填满, 悲剧了。
+
+
+
+
+
+
+二、安装裁剪好的内核
+kernel文件夹中的linux-.deb, 这三个文件为内核相关安装包, 如果你不需要在小鸡上编译软件可以只安装linux-image-.deb这一个文件就可以了。
+
+wget https://file.207614.xyz/chfs/shared/iso/dd/debian/kernel/linux-image-5.6.4_5.6.4-1_amd64.deb
+dpkg -i linux-image-5.6.4_5.6.4-1_amd64.deb
