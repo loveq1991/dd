@@ -20,3 +20,41 @@ mv /media/setup/* /media/sda/
 mv /lib/setup/* /.modloop/
  
 setup-alpine
+
+dd命令格式化硬盘dd if=/dev/zero of=/dev/vda bs=1k count=3000
+
+
+# 方式一 使用完整的安装脚本安装
+# ====================
+# 可能会需要网络
+setup-alpine
+
+# 方式二 先启动网络和 SSH 进行远程安装
+# ====================
+# 配置网络
+setup-interfaces
+# 重启网络服务
+rc-service networking restart
+# 安装 OpenSSH
+setup-sshd -c openssh
+# 允许 root 远程登陆
+echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
+# 重启 ssh 服务
+rc-service sshd restart
+# 设置密码
+passwd
+# 然后即可远程安装
+# 主要便于粘贴复制命令
+
+# 方式三 直接安装到磁盘
+# ====================
+# 使用 extended 镜像可直接离线安装到物理磁盘, standard 需要网络
+# 使用询问的方式安装
+setup-disk
+
+# 直接安装
+# -m 为安装模式, sys 是作为系统盘安装
+# -s 指定交换区大小, 0 为不要交换区
+# -v 指定安装盘
+# 安装时可指定磁盘格式, 对新手不建议修改, 默认 ext4, 其他的可使用 btrfs 和 lvm 等
+setup-disk -m sys -s 0 -v /dev/sdb
