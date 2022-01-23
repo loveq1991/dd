@@ -1,0 +1,22 @@
+ifconfig eth0 up && eth0 udhcpc
+
+wget nl.alpinelinux.org/alpine/v3.15/releases/x86_64/alpine-extended-3.15.0-x86_64.iso
+
+dd if=alpine-extended-3.15.0-x86_64.iso of=/dev/vda
+
+reboot
+
+
+mkdir /media/setup
+cp -a /media/sda/* /media/setup
+
+mkdir /lib/setup
+cp -a /.modloop/* /lib/setup
+
+/etc/init.d/modloop stop
+umount /dev/sda
+ 
+mv /media/setup/* /media/sda/
+mv /lib/setup/* /.modloop/
+ 
+setup-alpine
