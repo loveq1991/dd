@@ -1,4 +1,4 @@
-ifconfig eth0 up && eth0 udhcpc
+ifconfig eth0 up && udhcpc eth0
 
 wget nl.alpinelinux.org/alpine/v3.15/releases/x86_64/alpine-extended-3.15.0-x86_64.iso
 
