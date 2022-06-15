@@ -63,7 +63,7 @@ server {
     listen 80;
     listen [::]:80;                        #这是IPv4和IPv6的80端口监听
     server_name xxxx.com;                  #域名
-                                           # 下面是真正的ws转发给v2ray
+                                           #80端口配置，不需要申请证书和打开tls
     location /ray {                        #与V2Ray配置中的path保持一致
         proxy_redirect off;
         proxy_pass http://127.0.0.1:10086; #假设WebSocket监听在环回地址的10086端口上
