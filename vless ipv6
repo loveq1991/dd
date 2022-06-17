@@ -1,0 +1,46 @@
+{
+    "log": {
+        "loglevel": "none"
+    },
+    "inbounds": [
+        {
+            "port": 1234,
+            "protocol": "vless",
+            "settings": {
+                "clients": [
+                    {
+                        "id": "81f1f510-3ca7-4734-8956-0f4fce670af5"
+                    }
+                ],
+                "disableInsecureEncryption": false,
+                "decryption": "none"
+            },
+            "dns": {
+                "servers": [
+                  "2001:67c:2b0::4",
+                  "2001:67c:2b0::6"
+                ]
+            },
+            "streamSettings": {
+                "network": "ws",
+                "security": "none",
+                "wsSettings": {
+                    "path": "/fastssh" 
+                }                
+            }
+        }
+    ],
+  "outbounds": [
+    {
+      "domainStrategy": "UseIPv6",
+      "tag": "direct",
+      "protocol": "freedom",
+      "settings": {}
+    },    
+    {
+      "tag": "blocked",
+      "protocol": "blackhole",
+      "settings": {}
+    }
+  ]
+}
