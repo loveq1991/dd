@@ -1,0 +1,161 @@
+==【安装配置服务端】：==
+
+首先使用脚本在 服务端 VPS服务器安装frp
+
+wget --no-check-certificate https://raw.githubusercontent.com/clangcn/onekey-install-shell/master/frps/install-frps.sh -O ./install-frps.sh
+
+chmod 700 ./install-frps.sh
+
+./install-frps.sh install
+
+在配置文件里填写相应的端口
+
+安装完后会出现记录：
+
+You Server IP : 107.666.186.193（VPS公网ip）
+
+Bind port : 7788（通讯端口）
+
+KCP support : true
+
+vhost http port : 8899（http端口）
+
+vhost https port : 9900（https端口）
+
+Dashboard port : 6443（frp控制台端口）
+
+token : h1pl8888X36mtO3
+
+tcp_mux : true
+
+Max Pool count : 50
+
+Log level : info
+
+Log max days : 3
+
+Log file : enable
+
+==============================================
+
+frps Dashboard : http://107.666.186.193:6443/
+
+Dashboard user : admin
+
+Dashboard password : r99993Ie
+
+这是安装完后的管理命令（启动，停止，重启等）：
+
+frps status manage : frps {start|stop|restart|status|config|version}
+
+Example:
+
+start: frps start
+
+stop: frps stop
+
+restart: frps restart
+
+config：frps config
+
+然后执行frps config进入配置使用VI编辑器添加“顶级域名”
+
+在http端口上一条添加一行就行
+
+subdomain_host = xxx.com
+
+==【解析域名】==
+
+到域名管理解析页面把域名解析到A记录ip（abc A记录到ip）
+
+如果使用的三级或者二级域名，需要添加一个新的泛解析
+
+比如使用abc.123.com作为顶级域名使用（subdomain_host的参数）
+
+那么就需要解析一个 *.abc 到A记录ip（*这个泛解析对应的是客户端配置中的subdomain）
+
+比如subdomain = xzb 那么穿透的域名就是 （xzb1.abc.123.com:http的端口号）
+
+这样域名就解析完成了
+
+==【路由器设置】==
+
+//建议在配置前先恢复下出厂设置，格式化一下硬盘为ext4格式
+
+（格式教程https://www.jianshu.com/p/5e5b57681a50）
+
+然后到**子进行客户端配置
+
+1.扩展功能—配置扩展环境：
+
+启用opt自动更新
+
+启用扩展脚本自动更新
+
+opt强制安装
+
+都打开
+
+==【路由器最关键设置】==
+
+先把路由器切换成AP模式（如果是迅雷下载宝这种或者不用路由功能的）
+
+扩展功能—花生壳内网版—frp
+
+启用frp内网穿透
+
+启用frpc客户端
+
+都打开
+
+服务端不用打开，因为用的vps作为服务端
+
+然后下拉找到配置文件如下：
+
+# ==========客户端配置：==========
+
+[common]
+
+server_addr = frp.123.com（这个对应的是服务端配置里的subdomain_host）
+
+server_port = 7788（这个对应的是服务端配置里的Bind port）
+
+token = h1pl8888836mtO3（和服务端token一致，相当于秘钥了）
+
+#log_file = /dev/null
+
+#log_level = info
+
+#log_max_days = 3
+
+[web]
+
+remote_port = 8899（根据下面的type类型，对应的是服务端设置的端口，http就填8899）
+
+type = http
+
+local_ip = 192.168.0.220（本地ip）
+
+local_port = 888（本地端口，不同的端口对应的不同的服务）
+
+subdomain = xzb1
+
+（这个最重要，很多新手不理解，这就是在设置subdomain_host域名的多一级解析，比如这里是xzb1就相当于xzb1.123.com，如果这里填写kkk，就相当于kkk.123.com，访问管理穿透的话就在此域名后面加上http的端口号，比如：xzb1.123.com:8899）
+
+如果需要穿透多个端口管理，只需要在这个下面另起一套就行了，比如：
+
+[web2]（名称一定不要和上面一样）
+
+remote_port = 8899
+
+type = http
+
+local_ip = 192.168.0.220（这里一定要填写在本地网络能打开的真实ip）
+
+local_port = 331（端口一定要喝上面不一样）
+
+subdomain = xzb2（域名一定要和上面不一样）
+
+设置完，应用本页面设置，然后查看**子日志frps启动成功就可以了
+
+如果启动失败，请检查服务器的端口是否放行，宝塔为例：登录宝塔—安全—设置放行端口即可
